@@ -1,2 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using UnoGame;
+
+Deck deck = new();
+foreach (var card in deck)
+{
+    Console.WriteLine($"{card}");
+}
+Console.WriteLine(deck.Count);

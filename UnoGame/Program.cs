@@ -1,6 +1,7 @@
 ﻿using UnoGame;
 
-Deck deck = new();
+
+Deck deck = [];
 foreach (var card in deck)
 {
     Console.WriteLine($"{card}");

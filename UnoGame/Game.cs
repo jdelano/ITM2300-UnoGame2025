@@ -45,7 +45,13 @@ public class Game
                 ProcessInput();
                 RenderOutput();
             } while (!isRoundOver);
-
+            Console.WriteLine($"Congratulations! Player {currentPlayerIndex} Wins!");
+            Console.WriteLine("Press Q to quit or any other key to try another round...");
+            var keyInfo = Console.ReadKey();
+            if (keyInfo.Key == ConsoleKey.Q)
+            {
+                isGameOver = true;
+            }
         } while (!isGameOver);
     }
 
@@ -66,7 +72,7 @@ public class Game
         Deck.Shuffle();
         DealCards();
         DealCardToDiscardPile();
-        gameDirection = Direction.Right;
+        gameDirection = Direction.Left;
         RenderOutput();
     }
 

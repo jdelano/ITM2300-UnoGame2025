@@ -57,12 +57,49 @@ public class Game
 
     private void RenderOutput()
     {
-        throw new NotImplementedException();
+        Console.Clear();
+        DiscardPile.Display();
+        CurrentPlayer.Display();
     }
 
     private void ProcessInput()
     {
-        throw new NotImplementedException();
+        bool validCard = false;
+        Card card;
+        do
+        {
+            Console.Write("Which card would you like to play (enter D to draw a card)? ");
+            string response = Console.ReadLine();
+            if (response.ToUpper() == "D")
+            {
+                card = Deck.DrawCard();
+                CurrentPlayer.ReceiveCard(card);
+                Console.WriteLine($"\n\nYou drew the {card} card.");
+            }
+            else 
+            {
+                if (!int.TryParse(response, out int index) || index < 0 || index >= CurrentPlayer.CardsInHand)
+                {
+                    Console.WriteLine("Invalid selection. Please try again.");
+                    continue;
+                }
+                else
+                {
+                    card = CurrentPlayer.Hand[index];
+                    Console.WriteLine($"\n\nYou selected the {card} card.");
+                }
+            }
+            validCard = PlayCard(CurrentPlayer, card);
+        } while (!validCard);
+    }
+
+    private bool PlayCard(Player currentPlayer, Card card)
+    {
+        if (DiscardPile.TopCard.Matches(card))
+        {
+            currentPlayer.RemoveCard(card);
+            DiscardPile.Add(card);
+        }
     }
 
     private void InitializeRound()

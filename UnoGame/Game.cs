@@ -1,4 +1,5 @@
 using System;
+using System.Security;
 
 namespace UnoGame;
 
@@ -45,7 +46,7 @@ public class Game
                 ProcessInput();
                 RenderOutput();
             } while (!isRoundOver);
-            Console.WriteLine($"Congratulations! Player {currentPlayerIndex} Wins!");
+            Console.WriteLine($"Congratulations! Player {currentPlayerIndex + 1} Wins!");
             Console.WriteLine("Press Q to quit or any other key to try another round...");
             var keyInfo = Console.ReadKey();
             if (keyInfo.Key == ConsoleKey.Q)
@@ -76,7 +77,7 @@ public class Game
                 CurrentPlayer.ReceiveCard(card);
                 Console.WriteLine($"\n\nYou drew the {card} card.");
             }
-            else 
+            else
             {
                 if (!int.TryParse(response, out int index) || index < 0 || index >= CurrentPlayer.CardsInHand)
                 {
@@ -99,7 +100,80 @@ public class Game
         {
             currentPlayer.RemoveCard(card);
             DiscardPile.Add(card);
+            if (currentPlayer.CardsInHand == 0)
+            {
+                isRoundOver = true;
+            }
+            else
+            {
+                Action<Card> action = GetActionForCard(card);
+                action(card);
+            }
+            return true;
         }
+        else
+        {
+            Console.WriteLine("\nThe card selected/drawn does not match the top card on the discard pile. It remains in your hand. Please try again.");
+            return false;
+        }
+
+    }
+
+    private Action<Card> GetActionForCard(Card card)
+    {
+        // Face, Reverse, Skip, DrawTwo, DrawFour, Wild
+        switch (card.Type)
+        {
+            case CardType.Reverse:
+                return c =>
+                {
+                    ReverseDirection();
+                    SetNextPlayer();
+                };
+            case CardType.Skip:
+                return c => SetNextPlayer(2);
+            case CardType.DrawTwo:
+                return c =>
+                {
+                    SetNextPlayer();
+                    for (int i = 0; i < 2; i++)
+                    {
+                        CurrentPlayer.ReceiveCard(Deck.DrawCard());
+                    }
+                    SetNextPlayer();
+                };
+            case CardType.DrawFour:
+                return c =>
+                {
+                    c.UpdateChosenColor();
+                    SetNextPlayer();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        CurrentPlayer.ReceiveCard(Deck.DrawCard());
+                    }
+                    SetNextPlayer();
+                };
+            case CardType.Wild:
+                return c =>
+                {
+                    c.UpdateChosenColor();
+                    SetNextPlayer();
+                };
+            default:
+                return c => SetNextPlayer();
+
+        }
+    }
+
+    private void ReverseDirection()
+    {
+        gameDirection = gameDirection == Direction.Right ? Direction.Left : Direction.Right;
+    }
+
+    private void SetNextPlayer(int skipPlayers = 1)
+    {
+        int direction = gameDirection == Direction.Right ? -1 : 1;
+        currentPlayerIndex = (currentPlayerIndex + Players.Count + direction * skipPlayers) % Players.Count;
     }
 
     private void InitializeRound()
